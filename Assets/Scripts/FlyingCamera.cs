@@ -11,13 +11,11 @@ public class FlyingCamera : MonoBehaviour
 
     [Header("Rotation")]
     private bool _canRotate = false;
-    private const float _rotationSpeedX = 1f;
-    private const float _rotationSpeedY = 1f;
+    private const float _sensitivityX = 1f;
+    private const float _sensitivityY = 1f;
 
     void Start()
-    {
-        
-    }
+    { }
 
     void Update()
     {
@@ -28,6 +26,7 @@ public class FlyingCamera : MonoBehaviour
         }
 
         HandleMovement();
+        HandleRotation();
     }
 
     private void HandleMovement()
@@ -35,11 +34,18 @@ public class FlyingCamera : MonoBehaviour
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
 
-        bool detectedMovement = Mathf.Abs(v) > 0.01f || Mathf.Abs(h) > 0.01f;
+        float z = 0.0f;
+        if (Input.GetKeyDown(KeyCode.E))
+            z += 1.0f;
+        if (Input.GetKeyDown(KeyCode.Q))
+            z -= 1.0f;
+
+        bool detectedMovement = 
+            Mathf.Abs(v) > 0.01f || Mathf.Abs(h) > 0.01f || Mathf.Abs(z) > 0.01f;
 
         if (detectedMovement)
         {
-            Vector3 movementVec = (v * _camera.transform.forward) + (h * _camera.transform.right);
+            Vector3 movementVec = (v * _camera.transform.forward) + (h * _camera.transform.right) + (z * _camera.transform.up);
             Vector3 displacement = movementVec * _movementSpeed * Time.deltaTime;
             _camera.transform.position += displacement;
         }
@@ -47,6 +53,18 @@ public class FlyingCamera : MonoBehaviour
 
     private void HandleRotation()
     {
+        float x = Input.GetAxis("Mouse X");
+        float y = Input.GetAxis("Mouse Y");
+        if (Mathf.Abs(x-y) > 0.01f)
+        {
+            float xRot = Input.GetAxis("Mouse X") * _sensitivityX;
+            float yRot = -(Input.GetAxis("Mouse Y") * _sensitivityY);
 
+            _camera.transform.Rotate(0f, xRot, 0f);
+            _camera.transform.Rotate(yRot, 0f, 0f);
+
+            // Locked z-rotation
+            _camera.transform.rotation = Quaternion.Euler(_camera.transform.eulerAngles.x, _camera.transform.eulerAngles.y, 1f);
+        }
     }
 }
