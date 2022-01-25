@@ -5,7 +5,7 @@ using UnityEngine;
 public class TerrainAdapter : MonoBehaviour
 {
     public Terrain WorkingTerrain = null;
-    [SerializeField] private GameObject _debugCube = null;
+    [SerializeField] private GameObject _debugShape = null;
 
     public TerrainAdapter(Terrain workingTerrain)
     {
@@ -139,11 +139,13 @@ public class TerrainAdapter : MonoBehaviour
     {
         foreach (Vector2 target in targets)
         {
+            float heightValue = WorkingTerrain.terrainData.GetHeight((int)target.x, (int)target.y);
             Vector3 terrainPos = WorkingTerrain.GetPosition();
-            GameObject cube = new GameObject();
-            cube.transform.position = terrainPos;
+            Vector3 shapePos = new Vector3(terrainPos.x + target.x, heightValue, terrainPos.y + target.y);
+
+            GameObject debugShapes = new GameObject("DebugShapes");
+            GameObject shape = Instantiate(_debugShape, debugShapes.transform);
+            shape.transform.position = shapePos;
         }
-
-
     }
 }

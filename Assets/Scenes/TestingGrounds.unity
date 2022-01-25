@@ -302,6 +302,67 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &448935266
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1331944078559194439, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
+      propertyPath: m_Name
+      value: TerrainAdapter_PF
+      objectReference: {fileID: 0}
+    - target: {fileID: 3394608115073943848, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
+      propertyPath: _debugShape
+      value: 
+      objectReference: {fileID: 8102140287495983866, guid: dc284d3ab482c534da7fefa0cc3ef165, type: 3}
+    - target: {fileID: 7527195381654709744, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
+      propertyPath: m_RootOrder
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7527195381654709744, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7527195381654709744, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7527195381654709744, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7527195381654709744, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7527195381654709744, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7527195381654709744, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7527195381654709744, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7527195381654709744, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7527195381654709744, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7527195381654709744, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
 --- !u!1001 &673907083
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -463,6 +524,10 @@ PrefabInstance:
       propertyPath: _terrain
       value: 
       objectReference: {fileID: 1919122225}
+    - target: {fileID: 717766472319049111, guid: e907affa96dca8c4ea45f566c141456c, type: 3}
+      propertyPath: _terrainAdapter
+      value: 
+      objectReference: {fileID: 1949825930}
     - target: {fileID: 1813279274321913368, guid: e907affa96dca8c4ea45f566c141456c, type: 3}
       propertyPath: m_Name
       value: ApplicationManager_PF
@@ -609,3 +674,14 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1949825930 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3394608115073943848, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
+  m_PrefabInstance: {fileID: 448935266}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de90064c3d16d8944b822c67b2c41620, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

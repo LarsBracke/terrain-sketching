@@ -43,4 +43,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de90064c3d16d8944b822c67b2c41620, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _debugCube: {fileID: 0}
+  WorkingTerrain: {fileID: 0}
+  _debugCube: {fileID: 8102140287495983866, guid: dc284d3ab482c534da7fefa0cc3ef165, type: 3}
