@@ -459,6 +459,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 717766472319049111, guid: e907affa96dca8c4ea45f566c141456c, type: 3}
+      propertyPath: _terrain
+      value: 
+      objectReference: {fileID: 1919122225}
     - target: {fileID: 1813279274321913368, guid: e907affa96dca8c4ea45f566c141456c, type: 3}
       propertyPath: m_Name
       value: ApplicationManager_PF

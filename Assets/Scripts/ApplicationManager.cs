@@ -4,14 +4,18 @@ using UnityEngine;
 
 public class ApplicationManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] private Terrain _terrain = null;
+
+    private void Start()
     {
-        
+        if (!_terrain)
+            Debug.LogWarning("No terrain found.");
+
+        TerrainAdapter adapter = new TerrainAdapter(_terrain);
+        adapter.RunPPA();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
         
     }
