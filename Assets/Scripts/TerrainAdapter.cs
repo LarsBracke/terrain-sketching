@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class TerrainAdapter : MonoBehaviour
 {
-    private Terrain _workingTerrain = null;
+    public Terrain WorkingTerrain = null;
+    [SerializeField] private GameObject _debugCube = null;
 
     public TerrainAdapter(Terrain workingTerrain)
     {
-        _workingTerrain = workingTerrain;
+        WorkingTerrain = workingTerrain;
     }
 
     private void Start()
@@ -24,20 +25,20 @@ public class TerrainAdapter : MonoBehaviour
 
     private void TargetRecognition() // Detecting points that could be on a ridge
     {
-        int mapWidth = _workingTerrain.terrainData.heightmapWidth;
-        int mapHeight = _workingTerrain.terrainData.heightmapHeight;
+        int mapWidth = WorkingTerrain.terrainData.heightmapWidth;
+        int mapHeight = WorkingTerrain.terrainData.heightmapHeight;
 
-        int profileLength = 1;
+        int profileLength = 6;
         List<Vector2> targets = new List<Vector2>();
 
         for (int indexY = 0; indexY < mapHeight; ++indexY)
         {
             for (int indexX = 0; indexX < mapWidth; ++indexX)
             {
-                if (!IsCoordinateValid(_workingTerrain, indexX, indexY, profileLength))
+                if (!IsCoordinateValid(WorkingTerrain, indexX, indexY, profileLength))
                     continue;
 
-                if (IsTarget(_workingTerrain, indexX, indexY, profileLength))
+                if (IsTarget(WorkingTerrain, indexX, indexY, profileLength))
                 {
                     Vector2 newTarget = new Vector2(indexX, indexY);
                     targets.Add(newTarget);
@@ -45,7 +46,8 @@ public class TerrainAdapter : MonoBehaviour
             }
         }
 
-        Debug.Log($"{targets.Count} targets found during target-recognotion");
+        Debug.Log
+            ($"{targets.Count} targets found during target-recognotion with profile-length {profileLength}");
         DebugDrawTargets(targets);
     }
 
@@ -137,11 +139,11 @@ public class TerrainAdapter : MonoBehaviour
     {
         foreach (Vector2 target in targets)
         {
- 
+            Vector3 terrainPos = WorkingTerrain.GetPosition();
+            GameObject cube = new GameObject();
+            cube.transform.position = terrainPos;
         }
 
-        Vector3 terrainPos = _workingTerrain.GetPosition();
-        GameObject cube = new GameObject();
-        cube.transform.position = terrainPos;
+
     }
 }
