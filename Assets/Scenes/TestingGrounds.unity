@@ -317,6 +317,14 @@ PrefabInstance:
       propertyPath: _debugShape
       value: 
       objectReference: {fileID: 8102140287495983866, guid: dc284d3ab482c534da7fefa0cc3ef165, type: 3}
+    - target: {fileID: 3394608115073943848, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
+      propertyPath: WorkingTerrain
+      value: 
+      objectReference: {fileID: 1919122225}
+    - target: {fileID: 3394608115073943848, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
+      propertyPath: _workingTerrain
+      value: 
+      objectReference: {fileID: 1919122225}
     - target: {fileID: 7527195381654709744, guid: 9f30b8f3f6b33764496ed5f2e2d4fd42, type: 3}
       propertyPath: m_RootOrder
       value: 6

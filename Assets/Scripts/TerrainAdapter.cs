@@ -4,16 +4,25 @@ using UnityEngine;
 
 public class TerrainAdapter : MonoBehaviour
 {
-    public Terrain WorkingTerrain = null;
+    [SerializeField] private Terrain _workingTerrain = null;
+
+    private Sketch _sketch;
+    private List<Vector2> _targets;
+    private const int _profileLength = 6;
+
+    [Header("Debugging")]
     [SerializeField] private GameObject _debugShape = null;
 
     public TerrainAdapter(Terrain workingTerrain)
     {
-        WorkingTerrain = workingTerrain;
+        _workingTerrain = workingTerrain;
     }
 
     private void Start()
-    { }
+    {
+        _sketch = new Sketch();
+        _targets = new List<Vector2>();
+    }
 
     private void Update()
     { }
@@ -36,30 +45,27 @@ public class TerrainAdapter : MonoBehaviour
 
     private void TargetRecognition() // Detecting points that could be on a ridge
     {
-        int mapWidth = WorkingTerrain.terrainData.heightmapWidth;
-        int mapHeight = WorkingTerrain.terrainData.heightmapHeight;
-
-        int profileLength = 6;
-        List<Vector2> targets = new List<Vector2>();
+        int mapWidth = _workingTerrain.terrainData.heightmapWidth;
+        int mapHeight = _workingTerrain.terrainData.heightmapHeight;
 
         for (int indexY = 0; indexY < mapHeight; ++indexY)
         {
             for (int indexX = 0; indexX < mapWidth; ++indexX)
             {
-                if (!IsCoordinateValid(WorkingTerrain, indexX, indexY, profileLength))
+                if (!IsCoordinateValid(_workingTerrain, indexX, indexY, _profileLength))
                     continue;
 
-                if (IsTarget(WorkingTerrain, indexX, indexY, profileLength))
+                if (IsTarget(_workingTerrain, indexX, indexY, _profileLength))
                 {
                     Vector2 newTarget = new Vector2(indexX, indexY);
-                    targets.Add(newTarget);
+                    _targets.Add(newTarget);
                 }
             }
         }
 
         Debug.Log
-            ($"{targets.Count} targets found during target-recognotion with profile-length {profileLength}");
-        DebugDrawTargets(targets);
+            ($"{_targets.Count} targets found during target-recognotion with profile-length {_profileLength}");
+        DebugDrawTargets(_targets);
     }
 
     private void TargetConnection() // Connecting neighboring points
@@ -150,8 +156,8 @@ public class TerrainAdapter : MonoBehaviour
     {
         foreach (Vector2 target in targets)
         {
-            float heightValue = WorkingTerrain.terrainData.GetHeight((int)target.x, (int)target.y);
-            Vector3 terrainPos = WorkingTerrain.GetPosition();
+            float heightValue = _workingTerrain.terrainData.GetHeight((int)target.x, (int)target.y);
+            Vector3 terrainPos = _workingTerrain.GetPosition();
             Vector3 shapePos = new Vector3(terrainPos.x + target.x, heightValue, terrainPos.y + target.y);
 
             GameObject debugShapes = new GameObject("DebugShapes");
