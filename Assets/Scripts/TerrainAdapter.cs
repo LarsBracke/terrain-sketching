@@ -18,9 +18,20 @@ public class TerrainAdapter : MonoBehaviour
     private void Update()
     { }
 
+    public void StartSketch()
+    {
+
+    }
+
+    public void EndSketch()
+    {
+
+    }
+
     public void RunPPA() // Detecting the terrain features
     {
         TargetRecognition();
+        TargetConnection();
     }
 
     private void TargetRecognition() // Detecting points that could be on a ridge

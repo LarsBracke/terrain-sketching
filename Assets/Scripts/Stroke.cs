@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Stroke : MonoBehaviour
+public struct Stroke
 {
-    private int _strokeDepth = int.MaxValue;
-    private List<Vector2> _strokePoints = new List<Vector2>();
+    private int _strokeDepth;
+    private List<Vector2> _strokePoints;
 
     public int StrokeDepth
     {
@@ -25,7 +25,10 @@ public class Stroke : MonoBehaviour
     }
 
     void Start()
-    { }
+    {
+        _strokeDepth = int.MaxValue;
+        _strokePoints = new List<Vector2>();
+    }
 
     void Update()
     { }

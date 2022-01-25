@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Sketch : MonoBehaviour
+public struct Sketch
 {
-    private List<Stroke> _strokes = new List<Stroke>();
+    private List<Stroke> _strokes;
 
     void Start()
     {
-        
+        _strokes = new List<Stroke>();
     }
 
     void Update()
