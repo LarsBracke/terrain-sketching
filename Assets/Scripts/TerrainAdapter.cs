@@ -10,7 +10,7 @@ public class TerrainAdapter : MonoBehaviour
     [SerializeField] private Terrain _workingTerrain = null;
 
     private Sketch _sketch;
-    private List<Vector2> _CandidateTargets;
+    private List<Vector2> _candidateTargets;
     private List<Vector2> _polyBrokenTargets;
     private const int _profileLength = 6;
 
@@ -25,8 +25,7 @@ public class TerrainAdapter : MonoBehaviour
     private void Awake()
     {
         _sketch = new Sketch();
-        _CandidateTargets = new List<Vector2>();
-        _polyBrokenTargets = new List<Vector2>();
+        _candidateTargets = new List<Vector2>();
     }
 
     private void Update()
@@ -64,14 +63,14 @@ public class TerrainAdapter : MonoBehaviour
                 if (IsTarget(_workingTerrain, indexX, indexY, _profileLength))
                 {
                     Vector2 newTarget = new Vector2(indexX, indexY);
-                    _CandidateTargets.Add(newTarget);
+                    _candidateTargets.Add(newTarget);
                 }
             }
         }
 
         Debug.Log
-            ($"{_CandidateTargets.Count} targets found during target-recognotion with profile-length {_profileLength}");
-        DebugDrawTargets(_CandidateTargets);
+            ($"{_candidateTargets.Count} targets found during target-recognotion with profile-length {_profileLength}");
+        //DebugDrawTargets(_candidateTargets);
     }
 
     //private void TargetConnection() // Connecting neighboring points from the candidates
@@ -81,10 +80,21 @@ public class TerrainAdapter : MonoBehaviour
 
     private void PolygonBreaking() // Breaking polygons (remove least important connection)
     {
-        foreach (Vector2 target in _CandidateTargets)
+        _polyBrokenTargets = new List<Vector2>(_candidateTargets);
+
+        foreach (Vector2 target in _candidateTargets)
         {
             List<Vector2> neighborhood = GetConnectedNeighborhood(target);
+            List<Vector2> targetsToRemove = PolyCheck(target, neighborhood);
+
+            foreach (Vector2 targetToRemove in targetsToRemove)
+            {
+                _polyBrokenTargets.Remove(targetToRemove);
+            }
         }
+
+        Debug.Log($"{_polyBrokenTargets.Count} targets remaining after poly-breaking");
+        DebugDrawTargets(_polyBrokenTargets);
     }
 
     private void BranchReduction() // Eliminating less important branches
@@ -179,46 +189,61 @@ public class TerrainAdapter : MonoBehaviour
     private List<Vector2> GetConnectedNeighborhood(Vector2 target)
     {
         List<Vector2> neighborhood = new List<Vector2>();
-        neighborhood.Add(target);
 
         Vector2 neighbor = new Vector2(target.x, target.y + 1);
         if (IsValidNeighbor(neighbor))
             neighborhood.Add(neighbor);
+        else
+            neighborhood.Add(new Vector2(float.MaxValue, float.MaxValue));
 
         neighbor = new Vector2(target.x + 1, target.y + 1);
         if (IsValidNeighbor(neighbor))
             neighborhood.Add(neighbor);
+        else
+            neighborhood.Add(new Vector2(float.MaxValue, float.MaxValue));
 
         neighbor = new Vector2(target.x + 1, target.y);
         if (IsValidNeighbor(neighbor))
             neighborhood.Add(neighbor);
+        else
+            neighborhood.Add(new Vector2(float.MaxValue, float.MaxValue));
 
         neighbor = new Vector2(target.x + 1, target.y - 1);
         if (IsValidNeighbor(neighbor))
             neighborhood.Add(neighbor);
+        else
+            neighborhood.Add(new Vector2(float.MaxValue, float.MaxValue));
 
         neighbor = new Vector2(target.x, target.y - 1);
         if (IsValidNeighbor(neighbor))
             neighborhood.Add(neighbor);
+        else
+            neighborhood.Add(new Vector2(float.MaxValue, float.MaxValue));
 
         neighbor = new Vector2(target.x - 1, target.y - 1);
         if (IsValidNeighbor(neighbor))
             neighborhood.Add(neighbor);
+        else
+            neighborhood.Add(new Vector2(float.MaxValue, float.MaxValue));
 
         neighbor = new Vector2(target.x - 1, target.y);
         if (IsValidNeighbor(neighbor))
             neighborhood.Add(neighbor);
+        else
+            neighborhood.Add(new Vector2(float.MaxValue, float.MaxValue));
 
         neighbor = new Vector2(target.x - 1, target.y + 1);
         if (IsValidNeighbor(neighbor))
             neighborhood.Add(neighbor);
+        else
+            neighborhood.Add(new Vector2(float.MaxValue, float.MaxValue));
 
         return neighborhood;
     }
 
     private bool IsValidNeighbor(Vector2 neighbor)
     {
-        if (_CandidateTargets.Contains(neighbor) &&
+        if (_candidateTargets.Contains(neighbor) &&
             IsCoordinateValid(_workingTerrain, (int) neighbor.x, (int) neighbor.y, 1))
         {
             return true;
@@ -228,11 +253,34 @@ public class TerrainAdapter : MonoBehaviour
     }
 
 
-    //private List<Vector2> PolyCheck(List<Vector2> neighborhood)
-    //{
-    //    foreach (Vector2 target in neighborhood)
-    //    {
-            
-    //    }
-    //}
+    private List<Vector2> PolyCheck(Vector2 target, List<Vector2> neighborhood)
+    {
+        List<Vector2> targetsToRemove = new List<Vector2>();
+
+        for (int index = 0; index < neighborhood.Count - 1; index +=2)
+        {
+            bool isPoly =
+                !(neighborhood[index].x < float.MaxValue &&
+                neighborhood[index + 1].x < float.MaxValue);
+
+            if (isPoly)
+            {
+                float vertex0Height = _workingTerrain.terrainData.GetHeight((int)target.x, (int)target.y);
+                float vertex1Height = _workingTerrain.terrainData.GetHeight((int)neighborhood[index].x, (int)neighborhood[index].y);
+                float vertex2Height = _workingTerrain.terrainData.GetHeight((int)neighborhood[index + 1].x, (int)neighborhood[index + 1].y);
+
+                if (vertex0Height < vertex1Height && vertex0Height < vertex2Height)
+                    targetsToRemove.Add(target);
+
+                if (vertex1Height < vertex0Height && vertex1Height < vertex2Height)
+                    targetsToRemove.Add(neighborhood[index]);
+
+                if (vertex2Height < vertex0Height && vertex2Height < vertex1Height)
+                    targetsToRemove.Add(neighborhood[index + 1]);
+
+            }
+        }
+
+        return targetsToRemove;
+    }
 }
