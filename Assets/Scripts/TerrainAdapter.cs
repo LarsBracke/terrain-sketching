@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Numerics;
 using UnityEngine;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
@@ -9,7 +8,13 @@ public class TerrainAdapter : MonoBehaviour
 {
     [SerializeField] private Terrain _workingTerrain = null;
 
+    [Header("Sketching")]
     private Sketch _sketch;
+    private Stroke _currentStroke;
+    private Plane _sketchPlane;
+    private bool _isSketching;
+
+    [Header("FeatureDetection")]
     private List<Vector2> _candidateTargets;
     private List<Vector2> _polyBrokenTargets;
     private const int _profileLength = 6;
@@ -25,33 +30,53 @@ public class TerrainAdapter : MonoBehaviour
     private void Awake()
     {
         _sketch = new Sketch();
+        _currentStroke = new Stroke();
+        _sketchPlane = new Plane((-1)*Camera.main.transform.forward, Camera.main.transform.position + 2*Camera.main.transform.forward);
         _candidateTargets = new List<Vector2>();
     }
 
     private void Update()
-    { }
-
-    public void StartSketch()
     {
-
+        ToggleSketching();
+        Sketching();
     }
 
-    public void EndSketch()
+    public void Sketching()
     {
+        if (!_isSketching)
+            return;
 
+        if (Input.GetKey(KeyCode.Mouse0))
+        {
+            Vector2 penPos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+            _currentStroke.AddStrokePoint(penPos); // Stroke will check if the point can be added
+        }
+    }
+
+    public void ToggleSketching()
+    {
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            _isSketching = !_isSketching;
+            Debug.Log($"Toggled sketching from {!_isSketching} to {_isSketching}");
+        }
     }
 
     public void RunPPA() // Detecting the terrain features
     {
         TargetRecognition();
-        //TargetConnection();
+        //Debug.Log($"{_candidateTargets.Count} targets found during target-recognotion with profile-length {_profileLength}");
+        //DebugDrawTargets(_candidateTargets);
+
         PolygonBreaking();
+        //Debug.Log($"{_polyBrokenTargets.Count} targets remaining after poly-breaking");
+        //DebugDrawTargets(_polyBrokenTargets);
     }
 
     private void TargetRecognition() // Detecting points that could be on a ridge
     {
-        int mapWidth = _workingTerrain.terrainData.heightmapWidth;
-        int mapHeight = _workingTerrain.terrainData.heightmapHeight;
+        int mapWidth = _workingTerrain.terrainData.heightmapResolution;
+        int mapHeight = _workingTerrain.terrainData.heightmapResolution;
 
         for (int indexY = 0; indexY < mapHeight; ++indexY)
         {
@@ -67,16 +92,7 @@ public class TerrainAdapter : MonoBehaviour
                 }
             }
         }
-
-        Debug.Log
-            ($"{_candidateTargets.Count} targets found during target-recognotion with profile-length {_profileLength}");
-        //DebugDrawTargets(_candidateTargets);
     }
-
-    //private void TargetConnection() // Connecting neighboring points from the candidates
-    //{
-
-    //}
 
     private void PolygonBreaking() // Breaking polygons (remove least important connection)
     {
@@ -93,8 +109,7 @@ public class TerrainAdapter : MonoBehaviour
             }
         }
 
-        Debug.Log($"{_polyBrokenTargets.Count} targets remaining after poly-breaking");
-        DebugDrawTargets(_polyBrokenTargets);
+
     }
 
     private void BranchReduction() // Eliminating less important branches
@@ -104,8 +119,8 @@ public class TerrainAdapter : MonoBehaviour
 
     private bool IsCoordinateValid(Terrain terrain, int x, int y, int profileLength)
     {
-        int mapWidth = terrain.terrainData.heightmapWidth;
-        int mapHeight = terrain.terrainData.heightmapHeight;
+        int mapWidth = terrain.terrainData.heightmapResolution;
+        int mapHeight = terrain.terrainData.heightmapResolution;
 
         bool valid =
             (x - profileLength > 0) &&

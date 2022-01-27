@@ -2,10 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct Stroke
+public class Stroke : MonoBehaviour
 {
-    private int _strokeDepth;
-    private List<Vector2> _strokePoints;
+    private int _strokeDepth = int.MaxValue;
+    private List<Vector2> _strokePoints = new List<Vector2>();
+
+    public int PointCount = 0;
+    public int PointDistance = 33;
 
     public int StrokeDepth
     {
@@ -15,21 +18,40 @@ public struct Stroke
 
     public void AddStrokePoint(Vector2 newPoint)
     {
+        if (!CanAddPoint(newPoint))
+            return;
+
         _strokePoints.Add(newPoint);
+        PointCount = _strokePoints.Count;
+
+        Debug.Log($"Point {newPoint} added to stroke, {PointCount} points present");
+    }
+
+    public List<Vector2> GetStrokePoints()
+    {
+        return _strokePoints;
     }
 
     public void Undo()
     {
         if (_strokePoints.Count > 0)
             _strokePoints.RemoveAt(_strokePoints.Count - 1);
+        PointCount = _strokePoints.Count;
     }
 
-    void Start()
+    private bool CanAddPoint(Vector2 newPoint)
     {
-        _strokeDepth = int.MaxValue;
-        _strokePoints = new List<Vector2>();
+        if (_strokePoints.Count == 0)
+            return true;
+        else
+            return
+                Vector3.Distance(_strokePoints[_strokePoints.Count - 1], newPoint) < PointDistance;
     }
 
-    void Update()
+    private void Awake()
+    {
+    }
+
+    private void Update()
     { }
 }
