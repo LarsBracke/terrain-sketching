@@ -51,6 +51,9 @@ public class TerrainAdapter : MonoBehaviour
             Vector2 penPos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
             _currentStroke.AddStrokePoint(penPos); // Stroke will check if the point can be added
         }
+
+        if (Input.GetKeyDown(KeyCode.L))
+            DebugDrawStroke(_currentStroke);
     }
 
     public void ToggleSketching()
@@ -108,8 +111,6 @@ public class TerrainAdapter : MonoBehaviour
                 _polyBrokenTargets.Remove(targetToRemove);
             }
         }
-
-
     }
 
     private void BranchReduction() // Eliminating less important branches
@@ -198,6 +199,22 @@ public class TerrainAdapter : MonoBehaviour
 
             GameObject shape = Instantiate(_debugShape, debugShapes.transform);
             shape.transform.position = shapePos;
+        }
+    }
+
+    private void DebugDrawStroke(Stroke stroke)
+    {
+        var strokePoints = stroke.GetStrokePoints();
+        GameObject debugShapes = new GameObject("DebugShapes");
+        debugShapes.transform.position = Camera.main.transform.position;
+
+        foreach (Vector2 strokePoint in strokePoints)
+        {
+            Vector3 cameraPos = Camera.main.transform.position;
+            Vector3 worldPos = new Vector3(cameraPos.x + strokePoint.x, cameraPos.y + strokePoint.y, cameraPos.z);
+
+            GameObject shape = Instantiate(_debugShape, debugShapes.transform);
+            shape.transform.position = worldPos;
         }
     }
 
