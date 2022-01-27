@@ -17,6 +17,8 @@ public class TerrainAdapter : MonoBehaviour
     [Header("FeatureDetection")]
     private List<Vector2> _candidateTargets;
     private List<Vector2> _polyBrokenTargets;
+    private List<Vector2> _projectedTargets;
+    private List<Vector2> _finalTargets;
     private const int _profileLength = 6;
 
     [Header("Debugging")]
@@ -33,6 +35,9 @@ public class TerrainAdapter : MonoBehaviour
         _currentStroke = new Stroke();
         _sketchPlane = new Plane((-1)*Camera.main.transform.forward, Camera.main.transform.position + 2*Camera.main.transform.forward);
         _candidateTargets = new List<Vector2>();
+        _polyBrokenTargets = new List<Vector2>();
+        _finalTargets = new List<Vector2>();
+        _projectedTargets = new List<Vector2>();
     }
 
     private void Update()
@@ -41,19 +46,18 @@ public class TerrainAdapter : MonoBehaviour
         Sketching();
     }
 
-    public void Sketching()
+    private void Sketching()
     {
-        if (!_isSketching)
-            return;
-
-        if (Input.GetKey(KeyCode.Mouse0))
+        if (Input.GetKey(KeyCode.Mouse0) && _isSketching)
         {
             Vector2 penPos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
             _currentStroke.AddStrokePoint(penPos); // Stroke will check if the point can be added
         }
 
-        if (Input.GetKeyDown(KeyCode.L))
-            DebugDrawStroke(_currentStroke);
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            ProjectTargets();
+        }
     }
 
     public void ToggleSketching()
@@ -63,6 +67,22 @@ public class TerrainAdapter : MonoBehaviour
             _isSketching = !_isSketching;
             Debug.Log($"Toggled sketching from {!_isSketching} to {_isSketching}");
         }
+    }
+
+    private void FindFinalTargets()
+    {
+    }
+
+    private void ProjectTargets()
+    {
+        foreach (Vector2 target in _polyBrokenTargets)
+        {
+            Vector3 worldPos = GetTargetWorldPos(target);
+            Vector2 screenPos = Camera.main.WorldToScreenPoint(worldPos);
+            _projectedTargets.Add(screenPos);
+        }
+
+        Debug.Log($"Projected {_projectedTargets.Count} targets");
     }
 
     public void RunPPA() // Detecting the terrain features
@@ -314,5 +334,14 @@ public class TerrainAdapter : MonoBehaviour
         }
 
         return targetsToRemove;
+    }
+
+    private Vector3 GetTargetWorldPos(Vector2 target)
+    {
+        Vector3 terrainWorldPos = _workingTerrain.GetPosition();
+        float targetHeight = _workingTerrain.terrainData.GetHeight((int)target.x, (int)target.y);
+        Vector3 targetWorldPos = new Vector3(terrainWorldPos.x + target.x, targetHeight, terrainWorldPos.z + target.y);
+
+        return terrainWorldPos;
     }
 }

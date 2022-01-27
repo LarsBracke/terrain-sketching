@@ -32,6 +32,22 @@ public class Stroke : MonoBehaviour
         return _strokePoints;
     }
 
+    public Vector2 GetStrokeXBounds()
+    {
+        float lowerBound = float.MaxValue;
+        float upperBound = float.MinValue;
+
+        foreach (Vector2 point in _strokePoints)
+        {
+            if (point.x < lowerBound)
+                lowerBound = point.x;
+            if (point.x > upperBound)
+                upperBound = point.x;
+        }
+
+        return new Vector2(lowerBound, upperBound);
+    }
+
     public void Undo()
     {
         if (_strokePoints.Count > 0)
