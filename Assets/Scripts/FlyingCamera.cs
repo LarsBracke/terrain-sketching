@@ -7,7 +7,7 @@ public class FlyingCamera : MonoBehaviour
     [SerializeField] private GameObject _camera = null;
 
     [Header("Movement")]
-    private const float _movementSpeed = 1f;
+    private const float _movementSpeed = 25f;
 
     [Header("Rotation")]
     private bool _canRotate = false;
@@ -53,6 +53,9 @@ public class FlyingCamera : MonoBehaviour
 
     private void HandleRotation()
     {
+        if (!Input.GetKey(KeyCode.Mouse1))
+            return;
+
         float x = Input.GetAxis("Mouse X");
         float y = Input.GetAxis("Mouse Y");
         if (Mathf.Abs(x-y) > 0.01f)
