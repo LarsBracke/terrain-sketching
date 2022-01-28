@@ -19,6 +19,7 @@ public class TerrainAdapter : MonoBehaviour
     private List<Vector2> _polyBrokenTargets;
     private List<Vector2> _projectedTargets;
     private List<Vector2> _finalTargets;
+    private List<Vector2> _finalTargetsProjected;
     private const int _profileLength = 6;
 
     [Header("Debugging")]
@@ -36,14 +37,22 @@ public class TerrainAdapter : MonoBehaviour
         _sketchPlane = new Plane((-1)*Camera.main.transform.forward, Camera.main.transform.position + 2*Camera.main.transform.forward);
         _candidateTargets = new List<Vector2>();
         _polyBrokenTargets = new List<Vector2>();
-        _finalTargets = new List<Vector2>();
         _projectedTargets = new List<Vector2>();
+        _finalTargets = new List<Vector2>();
+        _finalTargetsProjected = new List<Vector2>();
     }
 
     private void Update()
     {
         ToggleSketching();
         Sketching();
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            ProjectTargets();
+            FindFinalTargets();
+            DeformTerrain();
+        }
     }
 
     private void Sketching()
@@ -52,11 +61,6 @@ public class TerrainAdapter : MonoBehaviour
         {
             Vector2 penPos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
             _currentStroke.AddStrokePoint(penPos); // Stroke will check if the point can be added
-        }
-
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            ProjectTargets();
         }
     }
 
@@ -71,6 +75,52 @@ public class TerrainAdapter : MonoBehaviour
 
     private void FindFinalTargets()
     {
+        Vector2 strokeXBounds = _currentStroke.GetStrokeXBounds();
+
+        for (int index = 0; index < _projectedTargets.Count; ++index)
+        {
+            Vector2 target = _polyBrokenTargets[index];
+            Vector2 projectedTarget = _projectedTargets[index];
+
+            if (projectedTarget.x > strokeXBounds.x && projectedTarget.x < strokeXBounds.y)
+            {
+                _finalTargets.Add(target);
+                _finalTargetsProjected.Add(projectedTarget);
+            }
+        }
+
+        Debug.Log($"found {_finalTargets.Count} targets with bounds {strokeXBounds.x} - {strokeXBounds.y}");
+    }
+
+    private void DeformTerrain()
+    {
+        for (int index = 0; index < _finalTargets.Count; ++index)
+        {
+            var target = _finalTargets[index];
+            var targetWorldPos = GetTargetWorldPos(target);
+            var projectedTarget = _finalTargetsProjected[index];
+            var projectedTargetWorldPos = Camera.main.ScreenToWorldPoint(new Vector3(projectedTarget.x, projectedTarget.y, Camera.main.nearClipPlane));
+
+            float targetHeight = _workingTerrain.terrainData.GetHeight((int)target.x, (int)target.y);
+
+            Vector3 strokeIntersection = GetStrokeIntersectionPoint(projectedTarget);
+
+            float k = 1;
+            float newHeight =
+                targetHeight + k *
+                (projectedTargetWorldPos - strokeIntersection).magnitude *
+                ((targetWorldPos - Camera.main.transform.position).magnitude / (projectedTargetWorldPos - Camera.main.transform.position).magnitude);
+        }
+    }   
+    
+    private Vector3 GetStrokeIntersectionPoint(Vector2 projectedTarget)
+    {
+        //foreach (Vector2 strokePoint in _currentStroke.GetStrokePoints())
+        //{
+        //    float diff = Mathf.Abs(strokePoint.x, )
+        //}
+
+        return new Vector3();
     }
 
     private void ProjectTargets()
@@ -78,8 +128,10 @@ public class TerrainAdapter : MonoBehaviour
         foreach (Vector2 target in _polyBrokenTargets)
         {
             Vector3 worldPos = GetTargetWorldPos(target);
-            Vector2 screenPos = Camera.main.WorldToScreenPoint(worldPos);
-            _projectedTargets.Add(screenPos);
+            Vector3 screenPoint = RectTransformUtility.WorldToScreenPoint(Camera.main, worldPos);
+
+            //Vector3 projectedPos = Vector3.ProjectOnPlane(worldPos, Camera.main.transform.forward);
+            _projectedTargets.Add(new Vector2(screenPoint.x, screenPoint.y));
         }
 
         Debug.Log($"Projected {_projectedTargets.Count} targets");
@@ -238,6 +290,21 @@ public class TerrainAdapter : MonoBehaviour
         }
     }
 
+    private void DebugDrawProjectedTargets(List<Vector2> projectedTargets)
+    {
+        GameObject debugShapes = new GameObject("DebugShapes");
+        debugShapes.transform.position = Camera.main.transform.position;
+
+        foreach (Vector2 target in projectedTargets)
+        {
+            Vector3 cameraPos = Camera.main.transform.position;
+            Vector3 worldPos = new Vector3(cameraPos.x + target.x, cameraPos.y + target.y, cameraPos.z);
+
+            GameObject shape = Instantiate(_debugShape, debugShapes.transform);
+            shape.transform.position = worldPos;
+        }
+    }
+
     private List<Vector2> GetConnectedNeighborhood(Vector2 target)
     {
         List<Vector2> neighborhood = new List<Vector2>();
@@ -342,6 +409,6 @@ public class TerrainAdapter : MonoBehaviour
         float targetHeight = _workingTerrain.terrainData.GetHeight((int)target.x, (int)target.y);
         Vector3 targetWorldPos = new Vector3(terrainWorldPos.x + target.x, targetHeight, terrainWorldPos.z + target.y);
 
-        return terrainWorldPos;
+        return targetWorldPos;
     }
 }
