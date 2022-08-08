@@ -51,7 +51,9 @@ public class TerrainAdapter : MonoBehaviour
         {
             ProjectTargets();
             FindFinalTargets();
-            DeformTerrain();
+            DeformTerrain(); //TODO: Terrain deformation
+
+            DebugDrawTargets(_finalTargets); // Draw the final targets to deform
         }
     }
 
