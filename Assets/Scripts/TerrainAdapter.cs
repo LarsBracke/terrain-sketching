@@ -26,6 +26,10 @@ public class TerrainAdapter : MonoBehaviour
     private List<Vector2> _finalTargetsProjected;
     private const int _profileLength = 6;
 
+    [Header("Deformation")] 
+    private float _lowerCameraBound = 0.0f;
+    private float _upperCameraBound = 1000.0f;
+
     [Header("Debugging")]
     [SerializeField] private GameObject _debugShape = null;
 
@@ -98,8 +102,12 @@ public class TerrainAdapter : MonoBehaviour
 
             if (projectedTarget.x > strokeXBounds.x && projectedTarget.x < strokeXBounds.y)
             {
-                _finalTargets.Add(target);
-                _finalTargetsProjected.Add(projectedTarget);
+                float cameraDistance = Camera.main.WorldToScreenPoint(GetTargetWorldPos(target)).z;
+                if (cameraDistance > 0)
+                {
+                    _finalTargets.Add(target);
+                    _finalTargetsProjected.Add(projectedTarget);
+                }
             }
         }
 
@@ -130,7 +138,7 @@ public class TerrainAdapter : MonoBehaviour
             heights[(int) target.y, (int) target.x] = newHeight;
         }
 
-        _workingTerrain.terrainData.SetHeights(0, 0, heights);
+        //_workingTerrain.terrainData.SetHeights(0, 0, heights);
     }
 
     private Vector3 GetStrokeIntersectionPoint(Vector2 projectedTarget)
@@ -148,9 +156,8 @@ public class TerrainAdapter : MonoBehaviour
         foreach (Vector2 target in _polyBrokenTargets)
         {
             Vector3 worldPos = GetTargetWorldPos(target);
-            Vector3 screenPoint = RectTransformUtility.WorldToScreenPoint(Camera.main, worldPos);
+            Vector3 screenPoint = Camera.main.WorldToScreenPoint(worldPos);
 
-            //Vector3 projectedPos = Vector3.ProjectOnPlane(worldPos, Camera.main.transform.forward);
             _projectedTargets.Add(new Vector2(screenPoint.x, screenPoint.y));
         }
 
