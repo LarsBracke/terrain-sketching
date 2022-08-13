@@ -10,7 +10,7 @@ public class TerrainAdapter : MonoBehaviour
     [Header("General")] 
     private const float lambda = 0.01f;
 
-    private const float delta = 5.0f;
+    private const float delta = 1.0f;
     [Header("Terrain")]
     [SerializeField] private Terrain _workingTerrain = null;
     private float[,] _terrainBackup;
@@ -121,7 +121,7 @@ public class TerrainAdapter : MonoBehaviour
 
     private void DeformTerrain()
     {
-        float[,] heights = _workingTerrain.terrainData.GetHeights(0,0,255,255);
+        float[,] displacedHeights = _workingTerrain.terrainData.GetHeights(0,0,255,255);
 
         var strokePoints = _currentStroke.GetStrokePoints();
 
@@ -138,13 +138,17 @@ public class TerrainAdapter : MonoBehaviour
                 if (Mathf.Abs(strokeScreenPos.x - targetScreenPos.x) < delta)
                 {
                     // Height calculations
+                    float maxHeight = 36.0f;
+
                     float terrainHeight = _workingTerrain.terrainData.GetHeight((int)target.x, (int)target.y);
                     float displacement = strokeWorldPos.y - terrainHeight;
+
+                    displacedHeights[(int)target.y, (int)target.x] = (terrainHeight + displacement) / maxHeight; // Issue: Height is being clamped
                 }
             }
         }
 
-        //_workingTerrain.terrainData.SetHeights(0, 0, heights);
+        _workingTerrain.terrainData.SetHeights(0, 0, displacedHeights);
     }
 
     private Vector3 GetStrokeIntersectionPoint(Vector2 projectedTarget)
