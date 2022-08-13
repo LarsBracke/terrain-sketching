@@ -1,11 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 
 public class TerrainAdapter : MonoBehaviour
 {
+    [Header("General")] 
+    private const float lambda = 0.01f;
+
+    private const float delta = 5.0f;
     [Header("Terrain")]
     [SerializeField] private Terrain _workingTerrain = null;
     private float[,] _terrainBackup;
@@ -118,24 +123,25 @@ public class TerrainAdapter : MonoBehaviour
     {
         float[,] heights = _workingTerrain.terrainData.GetHeights(0,0,255,255);
 
-        for (int index = 0; index < _finalTargets.Count; ++index)
+        var strokePoints = _currentStroke.GetStrokePoints();
+
+        foreach (Vector2 strokePoint in strokePoints)
         {
-            var target = _finalTargets[index];
-            var targetWorldPos = GetTargetWorldPos(target);
-            var projectedTarget = _finalTargetsProjected[index];
-            var projectedTargetWorldPos = Camera.main.ScreenToWorldPoint(new Vector3(projectedTarget.x, projectedTarget.y, Camera.main.nearClipPlane));
+            Vector3 strokeWorldPos = Camera.main.ScreenToWorldPoint(strokePoint);
+            Vector2 strokeScreenPos = strokePoint;
 
-            float targetHeight = _workingTerrain.terrainData.GetHeight((int)target.x, (int)target.y);
+            foreach (Vector2 target in _finalTargets)
+            {
+                Vector3 targetWorldPos = GetTargetWorldPos(target);
+                Vector2 targetScreenPos = Camera.main.WorldToScreenPoint(targetWorldPos);
 
-            Vector3 strokeIntersection = GetStrokeIntersectionPoint(projectedTarget);
-
-            float k = 1;
-            float newHeight =
-                targetHeight + k *
-                (projectedTargetWorldPos - strokeIntersection).magnitude *
-                ((targetWorldPos - Camera.main.transform.position).magnitude / (projectedTargetWorldPos - Camera.main.transform.position).magnitude);
-
-            heights[(int) target.y, (int) target.x] = newHeight;
+                if (Mathf.Abs(strokeScreenPos.x - targetScreenPos.x) < delta)
+                {
+                    // Height calculations
+                    float terrainHeight = _workingTerrain.terrainData.GetHeight((int)target.x, (int)target.y);
+                    float displacement = strokeWorldPos.y - terrainHeight;
+                }
+            }
         }
 
         //_workingTerrain.terrainData.SetHeights(0, 0, heights);
