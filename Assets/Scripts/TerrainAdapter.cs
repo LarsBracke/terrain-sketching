@@ -6,7 +6,11 @@ using Vector3 = UnityEngine.Vector3;
 
 public class TerrainAdapter : MonoBehaviour
 {
+    [Header("Terrain")]
     [SerializeField] private Terrain _workingTerrain = null;
+    private float[,] _terrainBackup;
+    private int _terrainWidth;
+    private int _terrainHeight;
 
     [Header("Sketching")]
     private Sketch _sketch;
@@ -40,6 +44,10 @@ public class TerrainAdapter : MonoBehaviour
         _projectedTargets = new List<Vector2>();
         _finalTargets = new List<Vector2>();
         _finalTargetsProjected = new List<Vector2>();
+
+        _terrainWidth = _workingTerrain.terrainData.heightmapResolution;
+        _terrainHeight = _workingTerrain.terrainData.heightmapResolution;
+        _terrainBackup = _workingTerrain.terrainData.GetHeights(0, 0, _terrainWidth, _terrainHeight);
     }
 
     private void Update()
@@ -51,7 +59,11 @@ public class TerrainAdapter : MonoBehaviour
         {
             ProjectTargets();
             FindFinalTargets();
-            DeformTerrain(); //TODO: Terrain deformation
+            DeformTerrain(); 
+            
+            //TODO: Terrain deformation
+            //  Placing stroke-points in world space (only the points which have a matching x-coordinate with terrain feature) (z is distance from the camera)
+            //  create the displacement map with stroke points (take difference from curve height and terrain height)
 
             DebugDrawTargets(_finalTargets); // Draw the final targets to deform
         }
@@ -96,6 +108,8 @@ public class TerrainAdapter : MonoBehaviour
 
     private void DeformTerrain()
     {
+        float[,] heights = _workingTerrain.terrainData.GetHeights(0,0,255,255);
+
         for (int index = 0; index < _finalTargets.Count; ++index)
         {
             var target = _finalTargets[index];
@@ -112,9 +126,13 @@ public class TerrainAdapter : MonoBehaviour
                 targetHeight + k *
                 (projectedTargetWorldPos - strokeIntersection).magnitude *
                 ((targetWorldPos - Camera.main.transform.position).magnitude / (projectedTargetWorldPos - Camera.main.transform.position).magnitude);
+
+            heights[(int) target.y, (int) target.x] = newHeight;
         }
-    }   
-    
+
+        _workingTerrain.terrainData.SetHeights(0, 0, heights);
+    }
+
     private Vector3 GetStrokeIntersectionPoint(Vector2 projectedTarget)
     {
         //foreach (Vector2 strokePoint in _currentStroke.GetStrokePoints())
