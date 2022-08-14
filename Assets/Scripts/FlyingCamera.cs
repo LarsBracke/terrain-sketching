@@ -64,7 +64,7 @@ public class FlyingCamera : MonoBehaviour
             float yRot = -(Input.GetAxis("Mouse Y") * _sensitivityY);
 
             _camera.transform.Rotate(0f, xRot, 0f);
-            _camera.transform.Rotate(yRot, 0f, 0f);
+            //_camera.transform.Rotate(yRot, 0f, 0f);
 
             // Locked z-rotation
             _camera.transform.rotation = Quaternion.Euler(_camera.transform.eulerAngles.x, _camera.transform.eulerAngles.y, 1f);
