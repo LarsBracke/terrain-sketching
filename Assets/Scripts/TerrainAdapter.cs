@@ -146,7 +146,7 @@ public class TerrainAdapter : MonoBehaviour
                     float maxHeight = 36.0f;
 
                     float terrainHeight = _workingTerrain.terrainData.GetHeight((int)target.x, (int)target.y);
-                    float displacement = strokeWorldPos.y - terrainHeight;
+                    float displacement = (strokeWorldPos.y - terrainHeight);
 
                     displacementMap[(int)target.x, (int)target.y] = displacement;
                 }
@@ -192,7 +192,7 @@ public class TerrainAdapter : MonoBehaviour
             for (int widthIndex = 1; widthIndex < _terrainWidth - 1; ++widthIndex)
             {
                 newHeights[widthIndex, heightIndex] =
-                    (terrainHeights[widthIndex, heightIndex] + displacementMap[widthIndex, heightIndex]) /
+                    ((terrainHeights[widthIndex, heightIndex] * maxTerrainHeight) + displacementMap[widthIndex, heightIndex]) /
                     maxTerrainHeight;
             }
         }
