@@ -25,6 +25,8 @@ public class TerrainAdapter : MonoBehaviour
     private Stroke _currentStroke;
     private Plane _sketchPlane;
     private bool _isSketching;
+    [SerializeField] private GameObject _drawDot;
+    private TrailRenderer _trailRenderer = null;
 
     [Header("FeatureDetection")]
     private List<Vector2> _candidateTargets;
@@ -61,7 +63,8 @@ public class TerrainAdapter : MonoBehaviour
         _terrainHeight = _workingTerrain.terrainData.heightmapResolution - 1;
         _terrainBackup = _workingTerrain.terrainData.GetHeights(0, 0, _terrainWidth, _terrainHeight);
 
-        //_workingTerrain.terrainData.size = new Vector3(_workingTerrain.terrainData.size.x, 128.0f, _workingTerrain.terrainData.size.z);
+        if (_drawDot)
+            _trailRenderer = _drawDot.GetComponent<TrailRenderer>();
     }
 
     private void Update()
@@ -87,8 +90,16 @@ public class TerrainAdapter : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.Mouse0) && _isSketching)
         {
+            // Add point to the stroke
             Vector2 penPos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
             _currentStroke.AddStrokePoint(penPos); // Stroke will check if the point can be added
+
+            // Set draw dot to last point in the stroke
+            Vector3 drawPos =
+                Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10.0f));
+            _drawDot.transform.position = drawPos;
+
+            _trailRenderer.enabled = true;
         }
     }
 
@@ -98,6 +109,9 @@ public class TerrainAdapter : MonoBehaviour
         {
             _isSketching = !_isSketching;
             Debug.Log($"Toggled sketching from {!_isSketching} to {_isSketching}");
+
+            if (!_isSketching)
+                _trailRenderer.enabled = false;
         }
     }
 
