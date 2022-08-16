@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Plane = UnityEngine.Plane;
@@ -11,8 +12,8 @@ public class TerrainAdapter : MonoBehaviour
 {
     [Header("General")] 
     private const float lambda = 0.01f;
-
     private const float delta = 5.0f;
+
     [Header("Terrain")]
     [SerializeField] private Terrain _workingTerrain = null;
     private float[,] _terrainBackup;
@@ -56,8 +57,8 @@ public class TerrainAdapter : MonoBehaviour
         _finalTargets = new List<Vector2>();
         _finalTargetsProjected = new List<Vector2>();
 
-        _terrainWidth = _workingTerrain.terrainData.heightmapResolution;
-        _terrainHeight = _workingTerrain.terrainData.heightmapResolution;
+        _terrainWidth = _workingTerrain.terrainData.heightmapResolution - 1;
+        _terrainHeight = _workingTerrain.terrainData.heightmapResolution - 1;
         _terrainBackup = _workingTerrain.terrainData.GetHeights(0, 0, _terrainWidth, _terrainHeight);
 
         //_workingTerrain.terrainData.size = new Vector3(_workingTerrain.terrainData.size.x, 128.0f, _workingTerrain.terrainData.size.z);
@@ -125,7 +126,7 @@ public class TerrainAdapter : MonoBehaviour
 
     private void DeformTerrain()
     {
-        float[,] displacedHeights = _workingTerrain.terrainData.GetHeights(0, 0, 255, 255);
+        float[,] displacementMap = new float[_terrainWidth, _terrainHeight];
 
         var strokePoints = _currentStroke.GetStrokePoints();
 
@@ -147,48 +148,56 @@ public class TerrainAdapter : MonoBehaviour
                     float terrainHeight = _workingTerrain.terrainData.GetHeight((int)target.x, (int)target.y);
                     float displacement = strokeWorldPos.y - terrainHeight;
 
-                    displacedHeights[(int)target.y, (int)target.x] = (terrainHeight + displacement) / maxHeight; // Issue: Height is being clamped
-
-                    Debug.Log($"Terrain height: {terrainHeight}, Displacement: {displacement}" );
+                    displacementMap[(int)target.x, (int)target.y] = displacement;
                 }
             }
         }
 
-        //_workingTerrain.terrainData.SetHeights(0, 0, displacedHeights);
+        float[,] diffusedDisplacementMap =  PerformDiffusion(displacementMap);
 
+        _workingTerrain.terrainData.SetHeights(0, 0, ApplyDisplacementMap(diffusedDisplacementMap));
+    }
 
+    private float[,] PerformDiffusion(float[,] displacementMap)
+    {
+        float[,] diffusedMap = new float[_terrainWidth, _terrainHeight];
 
-        //float[,] displacedHeights = _workingTerrain.terrainData.GetHeights(0, 0, 255, 255);
+        for (int heightIndex = 1; heightIndex < _terrainHeight - 1; ++heightIndex)
+        {
+            for (int widthIndex = 1; widthIndex < _terrainWidth - 1; ++widthIndex)
+            {
+                float left = displacementMap[widthIndex - 1, heightIndex];
+                float right = displacementMap[widthIndex + 1, heightIndex];
+                float up = displacementMap[widthIndex, heightIndex + 1];
+                float down = displacementMap[widthIndex, heightIndex - 1];
 
-        //var strokePoints = _currentStroke.GetStrokePoints();
+                float diffusedValue = (1 / 4.0f) * (left + right + up + down);
 
-        //foreach (Vector2 target in _finalTargets)
-        //{
-        //    Vector3 targetWorldPos = GetTargetWorldPos(target);
-        //    Vector2 targetScreenPos = Camera.main.WorldToScreenPoint(targetWorldPos);
+                diffusedMap[heightIndex, widthIndex] = diffusedValue;
+            }
+        }
 
-        //    foreach (Vector2 strokePoint in strokePoints)
-        //    {
-        //        Vector3 strokeWorldPos = Camera.main.ScreenToWorldPoint(strokePoint);
-        //        Vector2 strokeScreenPos = strokePoint;
+        return diffusedMap;
+    }
 
-        //        if (Mathf.Abs(strokeScreenPos.x - targetScreenPos.x) < delta)
-        //        {
-        //            // Height calculations
-        //            const float maxHeight = 36.0f;
+    private float[,] ApplyDisplacementMap(float[,] displacementMap)
+    {
+        float maxTerrainHeight = 36.0f;
 
-        //            float displacementPercentage = targetScreenPos.y / strokeScreenPos.y;
-        //            float currentPercentage = displacedHeights[(int) target.y, (int) target.x] / maxHeight;
-        //            float newHeight =  currentPercentage + displacementPercentage;
+        float[,] terrainHeights = _workingTerrain.terrainData.GetHeights(0, 0, _terrainWidth, _terrainHeight);
+        float[,] newHeights = new float[_terrainWidth, _terrainHeight];
 
-        //            displacedHeights[(int)target.y, (int)target.x] = newHeight; // Issue: Height is being clamped
+        for (int heightIndex = 1; heightIndex < _terrainHeight - 1; ++heightIndex)
+        {
+            for (int widthIndex = 1; widthIndex < _terrainWidth - 1; ++widthIndex)
+            {
+                newHeights[widthIndex, heightIndex] =
+                    (terrainHeights[widthIndex, heightIndex] + displacementMap[widthIndex, heightIndex]) /
+                    maxTerrainHeight;
+            }
+        }
 
-        //            Debug.Log($"Previous: {currentPercentage}, Displacement: {displacementPercentage}, New height: {newHeight}");
-        //        }
-        //    }
-        //}
-
-        //_workingTerrain.terrainData.SetHeights(0, 0, displacedHeights);
+        return newHeights;
     }
 
 
