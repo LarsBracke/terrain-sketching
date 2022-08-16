@@ -167,8 +167,10 @@ public class TerrainAdapter : MonoBehaviour
             }
         }
 
+        // Perform diffusion on the displacement-map
         float[,] diffusedDisplacementMap =  PerformDiffusion(displacementMap);
 
+        // Apply the displacement map to the terrain
         _workingTerrain.terrainData.SetHeights(0, 0, ApplyDisplacementMap(diffusedDisplacementMap));
     }
 
@@ -180,6 +182,8 @@ public class TerrainAdapter : MonoBehaviour
         {
             for (int widthIndex = 1; widthIndex < _terrainWidth - 1; ++widthIndex)
             {
+                float current = displacementMap[widthIndex, heightIndex];
+
                 float left = displacementMap[widthIndex - 1, heightIndex];
                 float right = displacementMap[widthIndex + 1, heightIndex];
                 float up = displacementMap[widthIndex, heightIndex + 1];
