@@ -34,7 +34,7 @@ public class TerrainAdapter : MonoBehaviour
     private List<Vector2> _projectedTargets;
     private List<Vector2> _finalTargets;
     private List<Vector2> _finalTargetsProjected;
-    private const int _profileLength = 16;
+    private const int _profileLength = 10;
 
     [Header("Deformation")] 
     private float _lowerCameraBound = 0.0f;
@@ -76,13 +76,9 @@ public class TerrainAdapter : MonoBehaviour
         {
             ProjectTargets();
             FindFinalTargets();
-            DeformTerrain(); 
-            
-            //TODO: Terrain deformation
-            //  Placing stroke-points in world space (only the points which have a matching x-coordinate with terrain feature) (z is distance from the camera)
-            //  create the displacement map with stroke points (take difference from curve height and terrain height)
+            DeformTerrain();
 
-            DebugDrawTargets(_polyBrokenTargets);
+            DebugDrawTargets(_finalTargets);
         }
     }
 
@@ -147,12 +143,14 @@ public class TerrainAdapter : MonoBehaviour
         foreach (Vector2 strokePoint in strokePoints)
         {
             Vector2 strokeScreenPos = strokePoint;
-            Vector3 strokeWorldPos = Camera.main.ScreenToWorldPoint(new Vector3(strokePoint.x, strokePoint.y, 10.0f));
 
             foreach (Vector2 target in _finalTargets)
             {
                 Vector3 targetWorldPos = GetTargetWorldPos(target);
                 Vector2 targetScreenPos = Camera.main.WorldToScreenPoint(targetWorldPos);
+
+                float strokeDepth = Vector3.Distance(Camera.main.transform.position, targetWorldPos);
+                Vector3 strokeWorldPos = Camera.main.ScreenToWorldPoint(new Vector3(strokePoint.x, strokePoint.y, strokeDepth));
 
                 if (Mathf.Abs(strokeScreenPos.x - targetScreenPos.x) < delta)
                 {
