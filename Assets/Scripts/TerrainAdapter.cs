@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
@@ -38,7 +39,7 @@ public class TerrainAdapter : MonoBehaviour
 
     [Header("Deformation")] 
     private float _lowerCameraBound = 0.0f;
-    private float _upperCameraBound = 1000.0f;
+    private float _upperCameraBound = float.MaxValue;
 
     [Header("Debugging")]
     [SerializeField] private GameObject _debugShape = null;
@@ -122,8 +123,12 @@ public class TerrainAdapter : MonoBehaviour
 
             if (projectedTarget.x > strokeXBounds.x && projectedTarget.x < strokeXBounds.y)
             {
+                const float maxCameraDistance = 30.0f;
                 float cameraDistance = Camera.main.WorldToScreenPoint(GetTargetWorldPos(target)).z;
-                if (cameraDistance > 0)
+
+                Debug.Log($"Canera distance: {cameraDistance}");
+
+                if (cameraDistance > 0 && cameraDistance < maxCameraDistance)
                 {
                     _finalTargets.Add(target);
                     _finalTargetsProjected.Add(projectedTarget);
