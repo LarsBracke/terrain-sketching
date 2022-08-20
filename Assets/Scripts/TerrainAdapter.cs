@@ -79,7 +79,7 @@ public class TerrainAdapter : MonoBehaviour
             FindFinalTargets();
             DeformTerrain();
 
-            DebugDrawTargets(_finalTargets);
+            DebugDrawTargets(_polyBrokenTargets);
         }
     }
 
