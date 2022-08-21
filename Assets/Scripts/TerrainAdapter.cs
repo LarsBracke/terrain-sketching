@@ -73,18 +73,37 @@ public class TerrainAdapter : MonoBehaviour
         ToggleSketching();
         Sketching();
 
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            ResetApp();
+        }
+
         if (Input.GetKeyDown(KeyCode.P))
         {
             ProjectTargets();
             FindFinalTargets();
             DeformTerrain();
 
-            DebugDrawTargets(_polyBrokenTargets);
+            //DebugDrawTargets(_polyBrokenTargets);
         }
+    }
+
+    private void ResetApp()
+    {
+        Debug.Log("Reset");
+
+        _currentStroke.Clear();
+        //_candidateTargets.Clear();
+        //_polyBrokenTargets.Clear();
+        _projectedTargets.Clear();
+        _finalTargets.Clear();
+        _finalTargetsProjected.Clear();
     }
 
     private void Sketching()
     {
+
+
         if (Input.GetKey(KeyCode.Mouse0) && _isSketching)
         {
             // Add point to the stroke
@@ -98,6 +117,7 @@ public class TerrainAdapter : MonoBehaviour
 
             _trailRenderer.enabled = true;
         }
+
     }
 
     public void ToggleSketching()
@@ -108,7 +128,11 @@ public class TerrainAdapter : MonoBehaviour
             Debug.Log($"Toggled sketching from {!_isSketching} to {_isSketching}");
 
             if (!_isSketching)
+            {
                 _trailRenderer.enabled = false;
+                _trailRenderer.ResetBounds();
+
+            }
         }
     }
 

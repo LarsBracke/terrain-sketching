@@ -16,6 +16,11 @@ public class Stroke : MonoBehaviour
         set { _strokeDepth = value; }
     }
 
+    public void Clear()
+    {
+        _strokePoints.Clear();
+    }
+
     public void AddStrokePoint(Vector2 newPoint)
     {
         if (!CanAddPoint(newPoint))
